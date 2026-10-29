@@ -138,20 +138,28 @@ table.t tbody tr:active td{background:#F2F7F3}
 .sheet .sub{font-size:11.5px;color:var(--dim);margin-bottom:14px}
 
 /* ---------- login ---------- */
-#login{min-height:100vh;background:var(--band);display:flex;flex-direction:column;justify-content:center;padding:26px 20px calc(env(safe-area-inset-bottom) + 26px);color:#EAF2ED}
-#login h1{margin:0 0 4px;font-size:17px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
-#login p.lead{margin:0 0 26px;font-size:12.5px;color:#9DBCAC;line-height:1.5}
-#login label{display:block;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:#9DBCAC;font-weight:600;margin-bottom:5px}
-#login input{width:100%;padding:13px 12px;border:1px solid rgba(255,255,255,.18);border-radius:9px;font-size:16px;background:rgba(255,255,255,.07);color:#fff;margin-bottom:13px;font-family:inherit}
+#login,#recover{min-height:100vh;background:var(--band);display:flex;flex-direction:column;justify-content:center;padding:26px 20px calc(env(safe-area-inset-bottom) + 26px);color:#EAF2ED}
+#login h1,#recover h1{margin:0 0 4px;font-size:17px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+#login p.lead,#recover p.lead{margin:0 0 26px;font-size:12.5px;color:#9DBCAC;line-height:1.5}
+#login label,#recover label{display:block;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:#9DBCAC;font-weight:600;margin-bottom:5px}
+#login input,#recover input{width:100%;padding:13px 12px;border:1px solid rgba(255,255,255,.18);border-radius:9px;font-size:16px;background:rgba(255,255,255,.07);color:#fff;margin-bottom:13px;font-family:inherit}
 #login input:focus{outline:2px solid #5FD3A0;outline-offset:-1px}
-#login button{width:100%;padding:14px;border:none;border-radius:9px;background:#5FD3A0;color:#11241B;font-size:13.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;font-family:inherit}
+#login button,#recover button{width:100%;padding:14px;border:none;border-radius:9px;background:#5FD3A0;color:#11241B;font-size:13.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;font-family:inherit}
 #login button:disabled{opacity:.5}
-#login .msg{font-size:12.5px;line-height:1.45;margin-bottom:14px;padding:10px 12px;border-radius:8px}
-#login .msg.bad{background:rgba(185,106,106,.18);color:#F0BDBD}
-#login .spine-art{height:44px;position:relative;margin-bottom:22px}
-#login .spine-art i{position:absolute;top:0;bottom:0;width:1px;left:50%;background:rgba(255,255,255,.2)}
-#login .spine-art b{position:absolute;height:9px;border-radius:2px}
+#login .msg,#recover .msg{font-size:12.5px;line-height:1.45;margin-bottom:14px;padding:10px 12px;border-radius:8px}
+#login .msg.bad,#recover .msg.bad{background:rgba(185,106,106,.18);color:#F0BDBD}
+#login .spine-art,#recover .spine-art{height:44px;position:relative;margin-bottom:22px}
+#login .spine-art i,#recover .spine-art i{position:absolute;top:0;bottom:0;width:1px;left:50%;background:rgba(255,255,255,.2)}
+#login .spine-art b,#recover .spine-art b{position:absolute;height:9px;border-radius:2px}
 
+.gbtn{width:100%;padding:14px;border:1px solid rgba(255,255,255,.28);border-radius:9px;background:rgba(255,255,255,.06);
+  color:#EAF2ED;font-size:13.5px;font-weight:600;letter-spacing:.04em;cursor:pointer;font-family:inherit;min-height:52px}
+.gbtn:active{background:rgba(255,255,255,.14)}
+.linkbtn{display:block;width:100%;background:none;border:none;color:#9DBCAC;font-size:12.5px;padding:12px 0 2px;
+  cursor:pointer;font-family:inherit;text-decoration:underline;text-underline-offset:3px}
+.orline{display:flex;align-items:center;gap:12px;margin:16px 0 14px;color:#6E8C7C;font-size:11px;
+  letter-spacing:.14em;text-transform:uppercase}
+.orline::before,.orline::after{content:"";flex:1;height:1px;background:rgba(255,255,255,.14)}
 .ver{text-align:center;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6E8C7C;margin-top:18px}
 .toast{position:fixed;bottom:calc(env(safe-area-inset-bottom) + 22px);left:50%;transform:translateX(-50%);background:#22362C;color:#fff;padding:9px 16px;border-radius:20px;font-size:12.5px;letter-spacing:.06em;z-index:60}
 /* ---------- phone ---------- */
@@ -203,7 +211,21 @@ table.t tbody tr:active td{background:#F2F7F3}
   <label for="pw">Password</label>
   <input id="pw" type="password" autocomplete="current-password" placeholder="••••••••">
   <button id="signin">Sign in</button>
+  <button class="linkbtn" id="forgot">Forgot your password?</button>
+  <div class="orline"><span>or</span></div>
+  <button class="gbtn" id="google">Continue with Google</button>
   <div class="ver" id="verLogin"></div>
+</div>
+
+<div id="recover" class="hide">
+  <h1>New password</h1>
+  <p class="lead">Choose a new password. You will stay signed in on this device afterwards.</p>
+  <div id="recMsg"></div>
+  <label for="np">New password</label>
+  <input id="np" type="password" autocomplete="new-password" placeholder="at least 8 characters">
+  <label for="np2">Repeat it</label>
+  <input id="np2" type="password" autocomplete="new-password" placeholder="••••••••">
+  <button id="setpw">Save password</button>
 </div>
 
 <div id="app" class="hide">
@@ -238,7 +260,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
    Nothing in here needs editing when you update the app.
    ================================================================== */
 
-const VERSION = "2.0";
+const VERSION = "2.1";
+
+let recovering = false;
 
 const CFG = window.WARD_CONFIG || {};
 const SUPABASE_URL      = CFG.url || "";
@@ -432,6 +456,57 @@ function loginMsg(t, kind){
   $('loginMsg').innerHTML = t ? `<div class="msg ${kind||''}">${esc(t)}</div>` : '';
 }
 
+function recMsg(t, kind){
+  $('recMsg').innerHTML = t ? `<div class="msg ${kind||''}">${esc(t)}</div>` : '';
+}
+
+async function doGoogle(){
+  const b = $('google'); b.disabled = true; b.textContent = 'Opening Google…';
+  const { error } = await sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin }
+  });
+  if(error){
+    b.disabled = false; b.textContent = 'Continue with Google';
+    loginMsg(/provider/i.test(error.message)
+      ? 'Google sign-in is not switched on for this app yet.'
+      : error.message, 'bad');
+  }
+}
+
+async function doForgot(){
+  const email = $('em').value.trim();
+  if(!email){ loginMsg('Type your email address above first, then tap this again.', 'bad'); $('em').focus(); return; }
+  const b = $('forgot'); b.disabled = true; b.textContent = 'Sending…';
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+  b.disabled = false; b.textContent = 'Forgot your password?';
+  if(error) loginMsg(error.message, 'bad');
+  else loginMsg('If that address has an account, a reset link is on its way. Open it on this device.', '');
+}
+
+function showRecovery(){
+  $('login').classList.add('hide');
+  $('app').classList.add('hide');
+  $('recover').classList.remove('hide');
+  recMsg('');
+  $('np').focus();
+}
+
+async function setNewPassword(){
+  const a = $('np').value, b2 = $('np2').value;
+  if(a.length < 8){ recMsg('Use at least 8 characters.', 'bad'); return; }
+  if(a !== b2){ recMsg('The two passwords do not match.', 'bad'); return; }
+  const btn = $('setpw'); btn.disabled = true; btn.textContent = 'Saving…';
+  const { error } = await sb.auth.updateUser({ password: a });
+  btn.disabled = false; btn.textContent = 'Save password';
+  if(error){ recMsg(error.message, 'bad'); return; }
+  recovering = false;
+  $('recover').classList.add('hide');
+  const { data } = await sb.auth.getSession();
+  applySession(data.session);
+  toast('Password changed');
+}
+
 async function boot(){
   const vl = $('verLogin'); if(vl) vl.textContent = `Version ${VERSION}`;
   if(!CONFIGURED){
@@ -441,13 +516,23 @@ async function boot(){
     $('login').classList.remove('hide');
     return;
   }
+  // a recovery link lands back here with #type=recovery in the URL
+  if(/type=recovery/.test(window.location.hash)) recovering = true;
+
   const { data } = await sb.auth.getSession();
-  applySession(data.session);
-  sb.auth.onAuthStateChange((_e, s) => applySession(s));
+  if(recovering && data.session){ showRecovery(); }
+  else applySession(data.session);
+
+  sb.auth.onAuthStateChange((e, s) => {
+    if(e === 'PASSWORD_RECOVERY'){ recovering = true; showRecovery(); return; }
+    if(recovering) return;        // stay on the set-password screen
+    applySession(s);
+  });
 }
 
 function applySession(session){
   S.session = session;
+  $('recover').classList.add('hide');
   if(session){
     S.email = session.user.email;
     $('login').classList.add('hide');
@@ -867,6 +952,10 @@ $('prev').onclick     = () => { S.date = shiftDate(S.date,-1); render(); if(S.op
 $('next').onclick     = () => { S.date = shiftDate(S.date, 1); render(); if(S.openPid) paintSheet(); };
 $('todayBtn').onclick = () => { S.date = currentChartDay(); render(); if(S.openPid) paintSheet(); };
 $('signin').onclick   = doSignIn;
+$('google').onclick   = doGoogle;
+$('forgot').onclick   = doForgot;
+$('setpw').onclick    = setNewPassword;
+$('np2').addEventListener('keydown', (e) => { if(e.key === 'Enter') setNewPassword(); });
 $('pw').addEventListener('keydown', (e) => { if(e.key === 'Enter') doSignIn(); });
 
 document.addEventListener('visibilitychange', () => { if(!document.hidden && S.session) fetchAll(); });
