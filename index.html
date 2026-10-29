@@ -54,7 +54,9 @@ body{
 .tab{flex:1;background:none;border:none;border-bottom:2.5px solid transparent;color:rgba(237,243,243,.72);padding:14px 4px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;font-family:inherit}
 .tab.on{color:#FFFFFF;border-bottom-color:var(--aqua)}
 
-.body{padding:14px;flex:1;padding-bottom:calc(env(safe-area-inset-bottom) + 24px)}
+.body{padding:14px;flex:1;padding-bottom:18px}
+.appfoot{flex:none;text-align:center;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--dim);opacity:.8;padding:2px 14px calc(env(safe-area-inset-bottom) + 16px)}
 
 /* ---------- table ---------- */
 .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--rule);border-radius:10px;background:var(--card)}
@@ -244,6 +246,7 @@ table.t tbody tr:active td.stick{background:#EAF6F6}
     <button class="tab" data-tab="you">You</button>
   </div>
   <div class="body fade" id="view"></div>
+  <div class="appfoot" id="appFoot"></div>
 </div>
 
 <div id="sheets"></div>
@@ -257,7 +260,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
    Nothing in here needs editing when you update the app.
    ================================================================== */
 
-const VERSION = "2.5";
+const VERSION = "2.5.1";
 
 let recovering = false;
 
@@ -515,7 +518,9 @@ async function setNewPassword(){
 }
 
 async function boot(){
-  const vl = $('verLogin'); if(vl) vl.textContent = `Version ${VERSION}`;
+  const stamp = `Version ${VERSION}`;
+  const vl = $('verLogin'); if(vl) vl.textContent = stamp;
+  const af = $('appFoot');  if(af) af.textContent = `Ward Balance · ${stamp}`;
   if(!CONFIGURED){
     document.body.innerHTML = `<div id="login"><h1>Ward Balance</h1>
       <p class="lead">Settings not found. There should be a file called <b>config.js</b> sitting next to
@@ -690,10 +695,6 @@ function viewYou(){
         <button class="btn ghost sm" data-act="setpw">Change password</button>
       </div>
       <div class="note">Changes it straight away. You stay signed in here; other devices keep their session until they sign out.</div>
-    </div>
-    <div class="card">
-      <h3>Version</h3>
-      <div class="note" style="margin-top:0">Ward Balance v${VERSION}</div>
     </div>
     <div class="card">
       <h3>Ward</h3>
