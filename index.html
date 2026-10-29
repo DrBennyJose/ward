@@ -152,6 +152,7 @@ table.t tbody tr:active td{background:#F2F7F3}
 #login .spine-art i{position:absolute;top:0;bottom:0;width:1px;left:50%;background:rgba(255,255,255,.2)}
 #login .spine-art b{position:absolute;height:9px;border-radius:2px}
 
+.ver{text-align:center;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6E8C7C;margin-top:18px}
 .toast{position:fixed;bottom:calc(env(safe-area-inset-bottom) + 22px);left:50%;transform:translateX(-50%);background:#22362C;color:#fff;padding:9px 16px;border-radius:20px;font-size:12.5px;letter-spacing:.06em;z-index:60}
 /* ---------- phone ---------- */
 .sheet>div{max-height:94vh}
@@ -202,6 +203,7 @@ table.t tbody tr:active td{background:#F2F7F3}
   <label for="pw">Password</label>
   <input id="pw" type="password" autocomplete="current-password" placeholder="••••••••">
   <button id="signin">Sign in</button>
+  <div class="ver" id="verLogin"></div>
 </div>
 
 <div id="app" class="hide">
@@ -235,6 +237,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
    Settings live in config.js, next to this file.
    Nothing in here needs editing when you update the app.
    ================================================================== */
+
+const VERSION = "2.0";
 
 const CFG = window.WARD_CONFIG || {};
 const SUPABASE_URL      = CFG.url || "";
@@ -429,6 +433,7 @@ function loginMsg(t, kind){
 }
 
 async function boot(){
+  const vl = $('verLogin'); if(vl) vl.textContent = `Version ${VERSION}`;
   if(!CONFIGURED){
     document.body.innerHTML = `<div id="login"><h1>Ward Balance</h1>
       <p class="lead">Settings not found. There should be a file called <b>config.js</b> sitting next to
@@ -578,6 +583,10 @@ function viewYou(){
     <div class="card">
       <h3>Install on your phone</h3>
       <div class="note" style="margin-top:0">In Safari, tap the Share button, then <b>Add to Home Screen</b>. It opens full screen with its own icon, like any other app.</div>
+    </div>
+    <div class="card">
+      <h3>Version</h3>
+      <div class="note" style="margin-top:0">Ward Balance v${VERSION}</div>
     </div>
     <div class="card">
       <h3>Ward</h3>
