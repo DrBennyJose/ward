@@ -260,7 +260,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
    Nothing in here needs editing when you update the app.
    ================================================================== */
 
-const VERSION = "2.5.1";
+const VERSION = "2.6";
 
 let recovering = false;
 
@@ -290,6 +290,19 @@ const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MONS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const fmtLong = (iso) => { const [y,m,d] = iso.split('-').map(Number); return `${DAYS[new Date(y,m-1,d).getDay()]} ${d} ${MONS[m-1]}`; };
 const shiftDate = (iso,n) => { const [y,m,d]=iso.split('-').map(Number); const dt=new Date(y,m-1,d); dt.setDate(dt.getDate()+n); return isoOf(dt); };
+const pad2 = (n) => String(n).padStart(2,'0');
+
+/* value for a datetime-local box, in the phone's own local time */
+const localStamp = (d) =>
+  `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+
+/* what the box starts on: now for today, otherwise noon of the day being viewed */
+const defaultStamp = () => {
+  if(S.date === currentChartDay()) return localStamp(new Date());
+  const [y,m,d] = S.date.split('-').map(Number);
+  return localStamp(new Date(y, m-1, d, 12, 0));
+};
+
 const fmtTime = (ts) => { const d = new Date(ts); return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
 
 const numOrNull = (v) => { if(v===''||v===null||v===undefined) return null; const n=Number(v); return Number.isFinite(n)?n:null; };
@@ -376,11 +389,13 @@ function localAdd(row){
   list.sort((a,b) => a.at.localeCompare(b.at));
 }
 
-async function addEntry(pid, day, vals){
+async function addEntry(pid, vals){
+  const when = vals.at ? new Date(vals.at) : new Date();
+  if(isNaN(when.getTime())){ toast('Check the date and time'); return false; }
   const row = {
     patient_id: pid,
-    chart_day: day,
-    at: new Date().toISOString(),
+    chart_day: chartDayOf(when),
+    at: when.toISOString(),
     sys: numOrNull(vals.sys), dia: numOrNull(vals.dia),
     intake: numOrNull(vals.intake), output: numOrNull(vals.output),
     weight: numOrNull(vals.weight),
@@ -397,7 +412,10 @@ async function addEntry(pid, day, vals){
 }
 
 async function updateEntry(id, vals){
+  const when = vals.at ? new Date(vals.at) : null;
+  if(vals.at && isNaN(when.getTime())){ toast('Check the date and time'); return false; }
   const patch = {
+    ...(when ? { at: when.toISOString(), chart_day: chartDayOf(when) } : {}),
     sys: numOrNull(vals.sys), dia: numOrNull(vals.dia),
     intake: numOrNull(vals.intake), output: numOrNull(vals.output),
     weight: numOrNull(vals.weight),
@@ -767,11 +785,15 @@ function paintSheet(){
         <div class="f"><label>Intake ml</label><input id="i_in" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="${f('intake')}" placeholder="—"></div>
         <div class="f"><label>Output ml</label><input id="i_out" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="${f('output')}" placeholder="—"></div>
       </div>
-      <div class="row" style="margin-bottom:0">
+      <div class="row">
         <div class="f"><label>Weight kg</label><input id="i_wt" type="text" inputmode="decimal" pattern="[0-9.]*" autocomplete="off" value="${f('weight')}" placeholder="—"></div>
-        <div class="f"><label>Time</label><input value="${ed ? fmtTime(ed.at) : 'now'}" disabled style="opacity:.6"></div>
       </div>
-      <div class="note">${ed ? 'The original time is kept. Your name is recorded against the change.' : 'Fill only what you have. The time is stamped automatically and this adds to the day, it does not replace earlier entries.'}</div>
+      <div class="row" style="margin-bottom:0">
+        <div class="f"><label class="l">Date and time</label>
+          <input id="i_at" type="datetime-local" value="${ed ? localStamp(new Date(ed.at)) : defaultStamp()}"></div>
+      </div>
+      <div class="note" id="dayHint"></div>
+      <div class="note">${ed ? 'Changing the time moves the entry to whichever charting day it falls in. Your name is recorded against the change.' : 'Fill only what you have. The time is set to now — change it to log a reading you forgot earlier. This adds to the day, it does not replace earlier entries.'}</div>
     </div>
 
     <div class="sheetact">${ed
@@ -808,11 +830,27 @@ function paintSheet(){
     if(v !== wtEl.value) wtEl.value = v;
   });
 
-  const read = () => ({ sys:$('i_sys').value, dia:$('i_dia').value, intake:$('i_in').value, output:$('i_out').value, weight:$('i_wt').value });
+  // say plainly which charting day a chosen time lands in, when it is not the one on screen
+  const atEl = $('i_at'), hintEl = $('dayHint');
+  const syncHint = () => {
+    if(!atEl || !hintEl) return;
+    const d = new Date(atEl.value);
+    if(!atEl.value || isNaN(d.getTime())){ hintEl.textContent = ''; return; }
+    const cd = chartDayOf(d);
+    if(cd === S.date){ hintEl.textContent = ''; hintEl.style.color = ''; }
+    else {
+      hintEl.textContent = `Lands on the ${fmtDMY(cd)} charting day, not the one on screen.`;
+      hintEl.style.color = 'var(--pos)';
+    }
+  };
+  if(atEl) atEl.addEventListener('change', syncHint);
+  syncHint();
+
+  const read = () => ({ sys:$('i_sys').value, dia:$('i_dia').value, intake:$('i_in').value, output:$('i_out').value, weight:$('i_wt').value, at:$('i_at') ? $('i_at').value : '' });
 
   if($('doAdd')) $('doAdd').onclick = async () => {
     const b = $('doAdd'); b.disabled = true; b.textContent = 'Saving…';
-    const ok = await addEntry(pid, S.date, read());
+    const ok = await addEntry(pid, read());
     if(ok) toast('Entry added');
     else { b.disabled = false; b.textContent = 'Add entry'; }
   };
