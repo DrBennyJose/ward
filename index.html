@@ -42,14 +42,14 @@ body{
 .dot.wait{background:#E0A94A}
 
 .datebar{display:flex;align-items:center;gap:6px;padding:10px 0 12px}
-.arrow{background:rgba(255,255,255,.1);border:none;color:#EAF2ED;width:34px;height:34px;border-radius:8px;font-size:17px;cursor:pointer;flex:none}
+.arrow{background:rgba(255,255,255,.1);border:none;color:#EAF2ED;width:44px;height:44px;border-radius:10px;font-size:20px;cursor:pointer;flex:none}
 .arrow:active{background:rgba(255,255,255,.22)}
 .dlab{flex:1;text-align:center;font-size:15px;font-weight:600}
 .dlab small{display:block;font-size:10px;font-weight:400;color:#9DBCAC;letter-spacing:.1em;text-transform:uppercase;margin-top:1px}
 .todaybtn{background:none;border:1px solid rgba(255,255,255,.25);color:#EAF2ED;font-size:10.5px;padding:6px 9px;border-radius:7px;cursor:pointer;flex:none;letter-spacing:.08em;text-transform:uppercase}
 
 .tabs{display:flex;background:var(--band);padding:0 14px;flex:none}
-.tab{flex:1;background:none;border:none;border-bottom:2.5px solid transparent;color:#8FAB9D;padding:10px 4px;font-size:11.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.tab{flex:1;background:none;border:none;border-bottom:2.5px solid transparent;color:#8FAB9D;padding:14px 4px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;font-family:inherit}
 .tab.on{color:#FFF;border-bottom-color:#5FD3A0}
 
 .body{padding:14px;flex:1;padding-bottom:calc(env(safe-area-inset-bottom) + 24px)}
@@ -57,9 +57,14 @@ body{
 /* ---------- table ---------- */
 .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--rule);border-radius:10px;background:var(--card)}
 table.t{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}
-table.t th{position:sticky;top:0;background:#EEF3EF;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700;padding:8px 9px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--rule)}
+table.t th{position:sticky;top:0;background:#EEF3EF;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700;padding:9px 7px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--rule)}
 table.t th.l,table.t td.l{text-align:left}
-table.t td{padding:9px;border-bottom:1px solid var(--rule2);white-space:nowrap;vertical-align:middle}
+table.t td{padding:11px 7px;border-bottom:1px solid var(--rule2);white-space:nowrap;vertical-align:middle}
+table.t td.vol{font-size:14px;color:#3E4D46}
+table.t td.cum{font-size:15px;font-weight:700}
+.psub{font-size:11px;color:var(--dim);margin-top:2px;overflow:hidden;text-overflow:ellipsis}
+table.t td.stick{max-width:150px;min-width:96px}
+.pname,.psub{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 table.t tr:last-child td{border-bottom:none}
 table.t .stick{position:sticky;left:0;z-index:2;background:var(--card);box-shadow:1px 0 0 var(--rule)}
 table.t th.stick{z-index:3;background:#EEF3EF}
@@ -67,7 +72,7 @@ table.t tbody tr:active td{background:#F2F7F3}
 .bed{font-size:10px;color:var(--dim);letter-spacing:.06em}
 .pname{font-weight:600;font-size:13.5px;line-height:1.2}
 .blank{color:#B7C2BB}
-.bal{display:inline-block;padding:2px 7px;border-radius:5px;font-weight:700;font-size:13px}
+.bal{display:inline-block;padding:4px 8px;border-radius:6px;font-weight:700;font-size:15px}
 .bal.n{background:var(--negbg);color:var(--neg)}
 .bal.p{background:var(--posbg);color:var(--pos)}
 .bal.z{background:#EEF0EE;color:var(--dim)}
@@ -83,19 +88,22 @@ table.t tbody tr:active td{background:#F2F7F3}
 .row.end{justify-content:flex-end}
 .row>.btn.auto{flex:0 1 auto;width:auto}
 .f{flex:1;min-width:0}
-.f label{display:block;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:4px}
-.f input{width:100%;padding:11px 10px;border:1px solid var(--rule);border-radius:8px;font-size:16px;background:#FCFDFC;color:var(--ink);font-family:ui-monospace,"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums}
+.f label{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:700;margin-bottom:5px;text-align:center}
+.f label.l{text-align:left}
+.f input{width:100%;padding:14px 12px;min-height:54px;border:1px solid var(--rule);border-radius:10px;font-size:19px;font-weight:600;background:#FCFDFC;color:var(--ink);font-family:ui-monospace,"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;-webkit-appearance:none}
+.f input[inputmode="numeric"],.f input[inputmode="decimal"]{text-align:center;letter-spacing:.02em}
+.f input::placeholder{font-weight:400;color:#C3CCC6}
 .f input.txt{font-family:inherit}
 .f input:focus{outline:2px solid var(--neg);outline-offset:-1px;border-color:var(--neg)}
-.btn{width:100%;padding:13px;border:none;border-radius:9px;background:var(--band);color:#fff;font-size:13.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;font-family:inherit}
+.btn{width:100%;padding:16px 13px;min-height:54px;border:none;border-radius:10px;background:var(--band);color:#fff;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;font-family:inherit}
 .btn:active{opacity:.82}
 .btn:disabled{background:#B6C2BA;cursor:default}
 .btn.ghost{background:none;color:var(--band);border:1px solid var(--rule);font-weight:600}
 .btn.danger{background:var(--pos);color:#fff;border:none}
 .btn.ghost.danger{background:none;color:var(--pos);border:1px solid #E4C4C0}
-.btn.sm{padding:9px;font-size:11.5px}
+.btn.sm{padding:12px 9px;min-height:46px;font-size:12px}
 .addrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px}
-.add{background:var(--band);color:#fff;border:none;border-radius:22px;padding:9px 15px 9px 12px;font-size:12.5px;font-weight:700;letter-spacing:.05em;cursor:pointer;display:flex;align-items:center;gap:6px;flex:none;font-family:inherit}
+.add{background:var(--band);color:#fff;border:none;border-radius:24px;padding:12px 18px 12px 14px;font-size:13px;font-weight:700;letter-spacing:.05em;cursor:pointer;display:flex;align-items:center;gap:7px;flex:none;font-family:inherit;min-height:46px}
 .add span{font-size:17px;line-height:1;font-weight:400;margin-top:-1px}
 .pill{display:inline-block;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border-radius:20px;background:#EEF3EF;color:var(--dim);font-weight:700}
 .pill.out{background:#F3EEE8;color:#8A6A3E}
@@ -104,18 +112,18 @@ table.t tbody tr:active td{background:#F2F7F3}
 .note{font-size:11.5px;color:var(--dim);line-height:1.5;margin-top:8px}
 .err{background:#F8E7E4;border:1px solid #E4C4C0;color:var(--pos);padding:10px 12px;border-radius:9px;font-size:12.5px;margin-bottom:12px;line-height:1.45}
 .ok{background:#E4F1F4;border:1px solid #B9DAE2;color:var(--neg);padding:10px 12px;border-radius:9px;font-size:12.5px;line-height:1.45;margin-bottom:12px}
-.mini{display:flex;gap:8px;margin-bottom:12px}
-.mini>div{flex:1;background:var(--card);border:1px solid var(--rule);border-radius:9px;padding:9px 10px}
+.mini{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.mini>div{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:11px 12px}
 .mini span{display:block;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:3px}
-.mini b{font-size:17px;font-weight:700}
+.mini b{font-size:21px;font-weight:700}
 
 /* ---------- entry list ---------- */
 .elist{margin-bottom:12px}
-.eitem{background:var(--card);border:1px solid var(--rule);border-radius:9px;padding:10px 11px;margin-bottom:7px;display:flex;align-items:center;gap:11px;cursor:pointer}
+.eitem{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:13px 12px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;min-height:58px}
 .eitem:active{background:#F2F7F3}
 .eitem.on{border-color:var(--neg);outline:1px solid var(--neg)}
-.etime{font-size:11.5px;color:var(--dim);font-weight:700;flex:none;width:52px;font-family:ui-monospace,"SF Mono",Menlo,monospace}
-.evals{flex:1;min-width:0;font-size:13px;line-height:1.35}
+.etime{font-size:13px;color:var(--dim);font-weight:700;flex:none;width:50px;font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.evals{flex:1;min-width:0;font-size:14.5px;line-height:1.35}
 .evals em{font-style:normal;color:var(--dim);font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin-right:3px}
 .eby{font-size:10.5px;color:var(--dim);margin-top:2px}
 .echev{color:#B7C2BB;font-size:15px;flex:none}
@@ -145,6 +153,32 @@ table.t tbody tr:active td{background:#F2F7F3}
 #login .spine-art b{position:absolute;height:9px;border-radius:2px}
 
 .toast{position:fixed;bottom:calc(env(safe-area-inset-bottom) + 22px);left:50%;transform:translateX(-50%);background:#22362C;color:#fff;padding:9px 16px;border-radius:20px;font-size:12.5px;letter-spacing:.06em;z-index:60}
+/* ---------- phone ---------- */
+.sheet>div{max-height:94vh}
+.sheetact{position:sticky;bottom:0;z-index:5;padding:14px 0 2px;margin-top:2px;
+  background:linear-gradient(to bottom,rgba(246,248,246,0),var(--paper) 24%)}
+.f input[disabled]{background:#F1F4F1}
+
+@media (max-width:440px){
+  .body{padding:12px}
+  .spinecell{display:none}
+  table.t td{padding:11px 6px}
+  table.t th{padding:9px 6px}
+  .sheet>div{padding-left:12px;padding-right:12px}
+  .card{padding:12px}
+  .row{gap:7px}
+}
+
+@media (max-width:400px){
+  table.t td{padding:11px 5px}
+  table.t th{padding:9px 5px}
+  table.t td.stick{max-width:112px}
+  table.t td.vol{font-size:13px}
+  .bal{font-size:14px;padding:4px 6px}
+  .pname{font-size:13px}
+  .psub{font-size:10.5px}
+}
+
 @media (prefers-reduced-motion:no-preference){
   .fade{animation:f .18s ease-out}
   @keyframes f{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
@@ -457,6 +491,8 @@ function spine(value, scale){
   return `<div class="spine"><i></i><b style="background:var(--${neg?'neg':'pos'});${neg?'right:50%':'left:50%'};width:${w}%"></b></div>`;
 }
 
+const bpPlain = (t) => t.bp ? `${t.bp.sys}/${t.bp.dia}` : null;
+
 const shownPatients = () => S.patients.filter(p => p.active && p.admitted <= S.date);
 
 function viewChart(){
@@ -475,23 +511,21 @@ function viewChart(){
   const rows = list.map(p => {
     const t = dayTotals(p.id, S.date);
     const c = cumulativeTo(p.id, S.date);
-    const bp = t.bp ? `${t.bp.sys}/${t.bp.dia}` : `<span class="blank">—</span>`;
     const cc = c===null ? '' : (c<0 ? 'var(--neg)' : c>0 ? 'var(--pos)' : '');
+    const sub = [bpPlain(t), t.count > 1 ? `${t.count} entries` : null].filter(Boolean).join(' · ');
     return `<tr data-open="${p.id}">
-      <td class="l stick">${p.bed?`<div class="bed mono">BED ${esc(p.bed)}</div>`:''}<div class="pname">${esc(p.name)}</div></td>
-      <td class="mono">${bp}</td>
-      <td class="mono">${t.intake!==null?t.intake:'<span class="blank">—</span>'}</td>
-      <td class="mono">${t.output!==null?t.output:'<span class="blank">—</span>'}</td>
+      <td class="l stick">${p.bed?`<div class="bed mono">BED ${esc(p.bed)}</div>`:''}<div class="pname">${esc(p.name)}</div>${sub?`<div class="psub mono">${sub}</div>`:''}</td>
+      <td class="mono vol">${t.intake!==null?t.intake:'<span class="blank">—</span>'}</td>
+      <td class="mono vol">${t.output!==null?t.output:'<span class="blank">—</span>'}</td>
       <td class="mono">${t.balance===null?'<span class="blank">—</span>':`<span class="bal ${t.balance<0?'n':t.balance>0?'p':'z'}">${signed(t.balance)}</span>`}</td>
-      <td>${spine(t.balance, scale)}</td>
-      <td class="mono" style="font-weight:700;color:${cc}">${c===null?'<span class="blank">—</span>':signed(c)}</td>
-      <td class="mono" style="font-size:11px;color:var(--dim)">${t.count||''}</td>
+      <td class="spinecell">${spine(t.balance, scale)}</td>
+      <td class="mono cum" style="color:${cc}">${c===null?'<span class="blank">—</span>':signed(c)}</td>
     </tr>`;
   }).join('');
 
   return head + `<div class="scroll"><table class="t">
       <thead><tr>
-        <th class="l stick">Patient</th><th>BP</th><th>In</th><th>Out</th><th>24 h</th><th class="l"></th><th>Cumulative</th><th>Entries</th>
+        <th class="l stick">Patient</th><th>In</th><th>Out</th><th>24 h</th><th class="l spinecell"></th><th>Cum</th>
       </tr></thead><tbody>${rows}</tbody></table></div>
     <div class="note">All volumes in ml, totalled across every entry made in this 08:00 to 08:00 window.
       Tap a row to add an entry or review the day's readings. Blue is negative balance, red is positive.</div>
@@ -609,21 +643,21 @@ function paintSheet(){
     <div class="card">
       <h3>${ed ? `Edit the ${fmtTime(ed.at)} entry` : 'Add an entry'}</h3>
       <div class="row">
-        <div class="f"><label>Systolic</label><input id="i_sys" inputmode="numeric" value="${f('sys')}" placeholder="—"></div>
-        <div class="f"><label>Diastolic</label><input id="i_dia" inputmode="numeric" value="${f('dia')}" placeholder="—"></div>
+        <div class="f"><label>Systolic</label><input id="i_sys" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="${f('sys')}" placeholder="—"></div>
+        <div class="f"><label>Diastolic</label><input id="i_dia" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="${f('dia')}" placeholder="—"></div>
       </div>
       <div class="row">
-        <div class="f"><label>Intake ml</label><input id="i_in" inputmode="numeric" value="${f('intake')}" placeholder="—"></div>
-        <div class="f"><label>Output ml</label><input id="i_out" inputmode="numeric" value="${f('output')}" placeholder="—"></div>
+        <div class="f"><label>Intake ml</label><input id="i_in" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="${f('intake')}" placeholder="—"></div>
+        <div class="f"><label>Output ml</label><input id="i_out" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="${f('output')}" placeholder="—"></div>
       </div>
       <div class="row" style="margin-bottom:0">
-        <div class="f"><label>Weight kg</label><input id="i_wt" inputmode="decimal" value="${f('weight')}" placeholder="—"></div>
+        <div class="f"><label>Weight kg</label><input id="i_wt" type="text" inputmode="decimal" pattern="[0-9.]*" autocomplete="off" value="${f('weight')}" placeholder="—"></div>
         <div class="f"><label>Time</label><input value="${ed ? fmtTime(ed.at) : 'now'}" disabled style="opacity:.6"></div>
       </div>
       <div class="note">${ed ? 'The original time is kept. Your name is recorded against the change.' : 'Fill only what you have. The time is stamped automatically and this adds to the day, it does not replace earlier entries.'}</div>
     </div>
 
-    ${ed
+    <div class="sheetact">${ed
       ? `<button class="btn" id="doSave">Save changes</button>
          <div class="row" style="margin-top:9px;margin-bottom:0">
            <button class="btn ghost sm" id="cancelEdit">Cancel</button>
@@ -633,12 +667,28 @@ function paintSheet(){
          <div class="row" style="margin-top:9px;margin-bottom:0">
            <button class="btn ghost sm" data-hist="${pid}">Full chart</button>
            <button class="btn ghost sm" data-close="1">Close</button>
-         </div>`}
+         </div>`}</div>
   `;
 
   body.querySelectorAll('[data-entry]').forEach(el => el.onclick = () => {
     S.editing = S.editing === el.dataset.entry ? null : el.dataset.entry;
     paintSheet();
+  });
+
+  // type=text is what gives iOS the big keypad, so keep the fields numeric ourselves
+  ['i_sys','i_dia','i_in','i_out'].forEach(id => {
+    const el = $(id); if(!el) return;
+    el.addEventListener('input', () => {
+      const v = el.value.replace(/[^0-9]/g,'');
+      if(v !== el.value) el.value = v;
+    });
+  });
+  const wtEl = $('i_wt');
+  if(wtEl) wtEl.addEventListener('input', () => {
+    let v = wtEl.value.replace(/[^0-9.]/g,'');
+    const i = v.indexOf('.');
+    if(i !== -1) v = v.slice(0, i+1) + v.slice(i+1).replace(/\./g,'');
+    if(v !== wtEl.value) wtEl.value = v;
   });
 
   const read = () => ({ sys:$('i_sys').value, dia:$('i_dia').value, intake:$('i_in').value, output:$('i_out').value, weight:$('i_wt').value });
@@ -709,7 +759,7 @@ function openDelete(pid){
       <div class="note" style="margin-top:0">If you only want them off the daily chart, close this and use
       <b>Discharge</b> instead — that keeps the record.</div>
       <div class="f" style="margin-top:12px">
-        <label>Type the patient's name to confirm</label>
+        <label class="l">Type the patient's name to confirm</label>
         <input class="txt" id="d_confirm" placeholder="${esc(p.name)}" autocapitalize="off" spellcheck="false">
       </div>
     </div>
@@ -737,11 +787,11 @@ function openAdmit(){
     <div class="sub">The cumulative balance is counted from the admission date.</div>
     <div class="card">
       <div class="row">
-        <div class="f" style="flex:2"><label>Name or identifier</label><input class="txt" id="a_name" placeholder="e.g. Anita S."></div>
-        <div class="f"><label>Bed</label><input class="txt" id="a_bed" placeholder="838"></div>
+        <div class="f" style="flex:2"><label class="l">Name or identifier</label><input class="txt" id="a_name" placeholder="e.g. Anita S."></div>
+        <div class="f"><label class="l">Bed</label><input class="txt" id="a_bed" placeholder="838"></div>
       </div>
       <div class="row" style="margin-bottom:0">
-        <div class="f"><label>Admission date</label><input id="a_date" type="date" value="${currentChartDay()}"></div>
+        <div class="f"><label class="l">Admission date</label><input id="a_date" type="date" value="${currentChartDay()}"></div>
       </div>
     </div>
     <button class="btn" id="doAdmit">Admit</button>
