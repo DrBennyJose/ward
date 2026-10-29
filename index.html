@@ -260,7 +260,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
    Nothing in here needs editing when you update the app.
    ================================================================== */
 
-const VERSION = "2.6";
+const VERSION = "2.7";
 
 let recovering = false;
 
@@ -360,12 +360,40 @@ function cumulativeTo(pid, day){
 }
 
 /* ---------------- data ---------------- */
+/* Supabase rejects a token whose "issued at" time is ahead of its own clock,
+   which happens when the phone's clock drifts. One silent refresh usually fixes it. */
+function plainError(msg){
+  if(/issued at future|issued in the future/i.test(msg))
+    return "Your phone's clock is ahead of the server, so your sign-in could not be verified. "
+         + "Turn on Settings \u2192 General \u2192 Date & Time \u2192 Set Automatically, then sign out and in again.";
+  if(/jwt expired|token is expired/i.test(msg))
+    return 'Your session has expired. Sign out and in again.';
+  if(/invalid jwt|jwt/i.test(msg))
+    return 'Your sign-in could not be verified. Sign out and in again.';
+  if(/failed to fetch|networkerror|load failed/i.test(msg))
+    return 'No connection to the ward database. Entries you make now will not be saved.';
+  return msg;
+}
+
+let authRetried = false;
+
 async function fetchAll(){
   const [p, e] = await Promise.all([
     sb.from('patients').select('*'),
     sb.from('entries').select('*').order('at', { ascending: true }),
   ]);
-  if(p.error || e.error){ S.err = (p.error || e.error).message; render(); return; }
+  const bad = p.error || e.error;
+  if(bad){
+    if(/jwt|token/i.test(bad.message) && !authRetried){
+      authRetried = true;
+      const { error: rerr } = await sb.auth.refreshSession();
+      if(!rerr) return fetchAll();
+    }
+    S.err = plainError(bad.message);
+    render();
+    return;
+  }
+  authRetried = false;
   S.err = '';
   S.patients = (p.data || []).sort(sortPt);
   const map = {};
