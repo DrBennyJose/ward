@@ -67,6 +67,27 @@ table.t td{padding:11px 7px;border-bottom:1px solid var(--rule2);white-space:now
 table.t td.vol{font-size:14px;color:#3E4D46}
 table.t td.cum{font-size:15px;font-weight:700}
 .psub{font-size:11px;color:var(--dim);margin-top:2px;overflow:hidden;text-overflow:ellipsis}
+
+/* weight line + add button sit under each patient row */
+table.t tr.prow td{border-bottom:none;padding-bottom:7px}
+table.t tr.wrow td{padding:0 7px 7px;border-bottom:none;white-space:normal}
+table.t tr.arow td{padding:0 7px 10px;border-bottom:1px solid var(--rule2)}
+table.t tr.arow.tight td{padding-top:0}
+table.t tbody tr:last-child td{border-bottom:none}
+.wline{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12.5px}
+.wlab{font-size:9px;letter-spacing:.12em;font-weight:700;color:var(--dim);flex:none}
+.wadm,.wpt{display:inline-flex;align-items:baseline;gap:2px;font-weight:600;color:var(--ink);white-space:nowrap}
+.wadm{color:var(--dim);font-weight:500}
+.wadm i,.wpt i{font-style:normal;font-size:8.5px;letter-spacing:.04em;color:var(--dim);font-weight:500}
+.warr{color:#B7C2BB;font-size:11px;flex:none}
+.wdel{font-weight:700;font-size:12px;padding:2px 6px;border-radius:5px;margin-left:auto;flex:none}
+.wdel.up{background:var(--posbg);color:var(--pos)}
+.wdel.down{background:var(--negbg);color:var(--neg)}
+.rowadd{background:none;border:1px solid var(--rule);border-radius:18px;color:var(--deep);
+  font-family:inherit;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:7px 13px 7px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;min-height:36px}
+.rowadd span{font-size:15px;font-weight:400;line-height:1}
+.rowadd:active{background:#EAF6F6}
 table.t td.stick{max-width:150px;min-width:96px}
 .pname,.psub{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 table.t tr:last-child td{border-bottom:none}
@@ -260,7 +281,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
    Nothing in here needs editing when you update the app.
    ================================================================== */
 
-const VERSION = "2.7";
+const VERSION = "2.8";
 
 let recovering = false;
 
@@ -320,6 +341,7 @@ const S = {
   live: false,
   err: '',
   editing: null,        // entry id being edited inside the sheet
+  sheetMode: 'day',     // 'add' = form only, 'day' = the day's entries plus the form
   openPid: null,        // patient whose sheet is open
 };
 
@@ -346,6 +368,30 @@ function dayTotals(pid, day){
   const balance = (intake === null && output === null) ? null : (intake||0) - (output||0);
   return { intake, output, balance, bp, weight, count: list.length };
 }
+
+/* one weight per charting day (the last recorded that day), oldest first */
+function weightSeries(pid, upto){
+  const byDay = {};
+  for(const e of (S.entries[pid] || [])){
+    if(e.weight === null || e.weight === undefined) continue;
+    if(upto && e.chart_day > upto) continue;
+    byDay[e.chart_day] = e.weight;          // later entry of the day wins
+  }
+  return Object.keys(byDay).sort().map(d => ({ day: d, kg: byDay[d] }));
+}
+
+/* admission weight plus the most recent three */
+function weightGlance(pid, upto){
+  const s = weightSeries(pid, upto);
+  if(!s.length) return null;
+  const adm = s[0];
+  const recent = s.slice(-3);
+  const last = s[s.length - 1];
+  const delta = s.length > 1 ? Math.round((last.kg - adm.kg) * 10) / 10 : null;
+  return { adm, recent, last, delta, n: s.length };
+}
+
+const dayShort = (iso) => { const [y,m,d] = iso.split('-').map(Number); return `${d}/${m}`; };
 
 /* running total from admission through this charting day */
 function cumulativeTo(pid, day){
@@ -661,14 +707,30 @@ function viewChart(){
     const c = cumulativeTo(p.id, S.date);
     const cc = c===null ? '' : (c<0 ? 'var(--neg)' : c>0 ? 'var(--pos)' : '');
     const sub = [bpPlain(t), t.count > 1 ? `${t.count} entries` : null].filter(Boolean).join(' · ');
-    return `<tr data-open="${p.id}">
+    const w = weightGlance(p.id, S.date);
+    const wStrip = w ? `<tr class="wrow" data-open="${p.id}"><td colspan="6">
+        <div class="wline">
+          <span class="wlab">WT</span>
+          <span class="wadm mono">${w.adm.kg}<i>adm</i></span>
+          ${w.n > 1 ? '<span class="warr">→</span>' : ''}
+          ${w.recent.filter(r => r.day !== w.adm.day).map(r =>
+            `<span class="wpt mono">${r.kg}<i>${dayShort(r.day)}</i></span>`).join('')}
+          ${w.delta !== null && w.delta !== 0
+            ? `<span class="wdel mono ${w.delta > 0 ? 'up' : 'down'}">${signed(w.delta)}</span>` : ''}
+        </div></td></tr>` : '';
+
+    return `<tr class="prow" data-open="${p.id}">
       <td class="l stick">${p.bed?`<div class="bed mono">BED ${esc(p.bed)}</div>`:''}<div class="pname">${esc(p.name)}</div>${sub?`<div class="psub mono">${sub}</div>`:''}</td>
       <td class="mono vol">${t.intake!==null?t.intake:'<span class="blank">—</span>'}</td>
       <td class="mono vol">${t.output!==null?t.output:'<span class="blank">—</span>'}</td>
       <td class="mono">${t.balance===null?'<span class="blank">—</span>':`<span class="bal ${t.balance<0?'n':t.balance>0?'p':'z'}">${signed(t.balance)}</span>`}</td>
       <td class="spinecell">${spine(t.balance, scale)}</td>
       <td class="mono cum" style="color:${cc}">${c===null?'<span class="blank">—</span>':signed(c)}</td>
-    </tr>`;
+    </tr>
+    ${wStrip}
+    <tr class="arow"><td colspan="6">
+      <button class="rowadd" data-add="${p.id}"><span>+</span> Add entry</button>
+    </td></tr>`;
   }).join('');
 
   return head + `<div class="scroll"><table class="t">
@@ -676,7 +738,8 @@ function viewChart(){
         <th class="l stick">Patient</th><th>In</th><th>Out</th><th>24 h</th><th class="l spinecell"></th><th>Cum</th>
       </tr></thead><tbody>${rows}</tbody></table></div>
     <div class="note">All volumes in ml, totalled across every entry made in this 08:00 to 08:00 window.
-      Tap a row to add an entry or review the day's readings. Blue is negative balance, red is positive.</div>
+      Tap a patient to open the full chart; tap <b>Add entry</b> to record a reading. Blue is negative, red is positive.
+      The weight line shows the admission weight and the last three.</div>
     <div class="row" style="margin-top:12px">
       <button class="btn ghost sm" data-act="refresh">Refresh</button>
       <button class="btn ghost sm" data-act="copy">Copy day as text</button>
@@ -749,10 +812,10 @@ function viewYou(){
 }
 
 /* ---------------- entry sheet ---------------- */
-function closeSheet(){ S.openPid = null; S.editing = null; $('sheets').innerHTML = ''; }
+function closeSheet(){ S.openPid = null; S.editing = null; S.sheetMode = 'day'; $('sheets').innerHTML = ''; }
 
-function openEntry(pid){
-  S.openPid = pid; S.editing = null;
+function openEntry(pid, mode){
+  S.openPid = pid; S.editing = null; S.sheetMode = mode || 'day';
   $('sheets').innerHTML = `<div class="sheet" data-close="1"><div id="sheetBody"></div></div>`;
   paintSheet();
 }
@@ -777,6 +840,8 @@ function paintSheet(){
   const c = cumulativeTo(pid, S.date);
   const ed = S.editing ? list.find(e => e.id === S.editing) : null;
 
+  const addOnly = S.sheetMode === 'add' && !ed;
+
   const items = list.length ? list.map(e => `
     <div class="eitem ${S.editing===e.id?'on':''}" data-entry="${e.id}">
       <div class="etime">${fmtTime(e.at)}</div>
@@ -793,6 +858,9 @@ function paintSheet(){
     <h2>${esc(p.name)}</h2>
     <div class="sub">${p.bed?`Bed ${esc(p.bed)} · `:''}Admitted ${fmtDMY(p.admitted)} · ${fmtDMY(S.date)}, 08:00 → 08:00</div>
 
+    ${addOnly ? '' : `<div class="daybar"><span class="eyebrow">Entries today</span><b class="mono" style="color:var(--dim)">${list.length}</b></div>
+    <div class="elist">${items}</div>`}
+
     <div class="mini">
       <div><span>Intake</span><b class="mono">${t.intake ?? '—'}</b></div>
       <div><span>Output</span><b class="mono">${t.output ?? '—'}</b></div>
@@ -800,8 +868,6 @@ function paintSheet(){
       <div><span>Cumulative</span><b class="mono" style="color:${c===null?'':c<0?'var(--neg)':c>0?'var(--pos)':''}">${c===null?'—':signed(c)}</b></div>
     </div>
 
-    <div class="daybar"><span class="eyebrow">Entries today</span><b class="mono" style="color:var(--dim)">${list.length}</b></div>
-    <div class="elist">${items}</div>
 
     <div class="card">
       <h3>${ed ? `Edit the ${fmtTime(ed.at)} entry` : 'Add an entry'}</h3>
@@ -832,8 +898,8 @@ function paintSheet(){
          </div>`
       : `<button class="btn" id="doAdd">Add entry</button>
          <div class="row" style="margin-top:9px;margin-bottom:0">
-           <button class="btn ghost sm" data-hist="${pid}">Full chart</button>
-           <button class="btn ghost sm" data-close="1">Close</button>
+           ${addOnly ? '' : `<button class="btn ghost sm" data-hist="${pid}">Full chart</button>`}
+           <button class="btn ghost sm" data-close="1">${addOnly ? 'Cancel' : 'Close'}</button>
          </div>`}</div>
   `;
 
@@ -902,14 +968,30 @@ function openHistory(pid){
   const days = [...new Set((S.entries[pid]||[]).map(e => e.chart_day))].sort();
   let run = null;
 
+  const admWt = (weightSeries(pid)[0] || {}).kg ?? null;
+  let lastWt = null;
+
   const rows = days.map(d => {
     const t = dayTotals(pid, d);
     if(t.balance !== null) run = (run||0) + t.balance;
     const cc = run===null ? '' : (run<0?'var(--neg)':run>0?'var(--pos)':'');
-    return `<tr>
+
+    let wCell = '<span class="blank">—</span>', dCell = '<span class="blank">—</span>';
+    if(t.weight !== null && t.weight !== undefined){
+      wCell = t.weight;
+      if(admWt !== null){
+        const dv = Math.round((t.weight - admWt) * 10) / 10;
+        dCell = dv === 0 ? '0'
+          : `<span class="wdel ${dv>0?'up':'down'}" style="font-size:12px">${signed(dv)}</span>`;
+      }
+      lastWt = t.weight;
+    }
+
+    return `<tr data-day="${d}">
       <td class="l stick mono" style="font-size:12px">${fmtDMY(d)}</td>
       <td class="mono">${t.bp?`${t.bp.sys}/${t.bp.dia}`:'<span class="blank">—</span>'}</td>
-      <td class="mono">${t.weight ?? '<span class="blank">—</span>'}</td>
+      <td class="mono">${wCell}</td>
+      <td class="mono">${dCell}</td>
       <td class="mono">${t.intake ?? '<span class="blank">—</span>'}</td>
       <td class="mono">${t.output ?? '<span class="blank">—</span>'}</td>
       <td class="mono">${t.balance===null?'<span class="blank">—</span>':`<span class="bal ${t.balance<0?'n':t.balance>0?'p':'z'}">${signed(t.balance)}</span>`}</td>
@@ -918,16 +1000,30 @@ function openHistory(pid){
     </tr>`;
   }).join('');
 
+  const netWt = (admWt !== null && lastWt !== null) ? Math.round((lastWt - admWt) * 10) / 10 : null;
+
   $('sheets').innerHTML = `<div class="sheet" data-close="1"><div>
     <h2>${esc(p.name)}</h2>
     <div class="sub">${p.bed?`Bed ${esc(p.bed)} · `:''}Admitted ${fmtDMY(p.admitted)} · ${days.length} charted day${days.length===1?'':'s'}</div>
-    ${days.length ? `<div class="scroll"><table class="t"><thead><tr>
-        <th class="l stick">Day</th><th>BP</th><th>Wt</th><th>In</th><th>Out</th><th>24 h</th><th>Cumulative</th><th>Entries</th>
+    ${days.length ? `${admWt !== null ? `<div class="mini" style="grid-template-columns:1fr 1fr 1fr">
+        <div><span>On admission</span><b class="mono">${admWt}</b></div>
+        <div><span>Latest weight</span><b class="mono">${lastWt ?? '—'}</b></div>
+        <div><span>Net change</span><b class="mono" style="color:${netWt===null?'':netWt>0?'var(--pos)':netWt<0?'var(--neg)':''}">${netWt===null?'—':signed(netWt)}</b></div>
+      </div>` : ''}
+      <div class="scroll"><table class="t"><thead><tr>
+        <th class="l stick">Day</th><th>BP</th><th>Wt</th><th>Δ Wt</th><th>In</th><th>Out</th><th>24 h</th><th>Cumulative</th><th>Entries</th>
       </tr></thead><tbody>${rows}</tbody></table></div>
-      <div class="note">Each row totals every entry made in that 08:00 to 08:00 window.</div>`
+      <div class="note">Each row totals every entry made in that 08:00 to 08:00 window.
+        Δ Wt is the change from the admission weight. Tap a day to see or edit its entries.</div>`
       : `<div class="empty"><strong>Nothing charted yet</strong>Entries will appear here once they are made.</div>`}
     <button class="btn ghost" style="margin-top:12px" data-close="1">Close</button>
   </div></div>`;
+
+  $('sheets').querySelectorAll('[data-day]').forEach(el => el.onclick = () => {
+    S.date = el.dataset.day;
+    render();
+    openEntry(pid, 'day');
+  });
 }
 
 /* ---------------- delete patient ---------------- */
@@ -1013,7 +1109,8 @@ function copyDay(){
 
 /* ---------------- events ---------------- */
 function wire(){
-  $('view').querySelectorAll('[data-open]').forEach(el => el.onclick = () => openEntry(el.dataset.open));
+  $('view').querySelectorAll('[data-open]').forEach(el => el.onclick = () => openHistory(el.dataset.open));
+  $('view').querySelectorAll('[data-add]').forEach(el => el.onclick = (e) => { e.stopPropagation(); openEntry(el.dataset.add, 'add'); });
   $('view').querySelectorAll('[data-hist]').forEach(el => el.onclick = (e) => { e.stopPropagation(); openHistory(el.dataset.hist); });
   $('view').querySelectorAll('[data-del]').forEach(el => el.onclick = (e) => { e.stopPropagation(); openDelete(el.dataset.del); });
   $('view').querySelectorAll('[data-toggle]').forEach(el => el.onclick = async () => {
